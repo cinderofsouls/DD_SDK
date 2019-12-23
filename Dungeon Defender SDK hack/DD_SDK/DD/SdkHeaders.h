@@ -1,4 +1,6 @@
-﻿#include "windows.h"
+﻿
+#ifndef   SDKHEADER_H
+#define   SDKHEADER_H
 /*
 #############################################################################################
 # Dungeon Defender (8.7.1) SDK
@@ -258,3 +260,5 @@ struct FScriptDelegate
 #include "SDK_HEADERS\DunDefPortal_classes.h"
 #include "SDK_HEADERS\DunDefPortal_f_structs.h"
 #include "SDK_HEADERS\DunDefPortal_functions.h"
+
+#endif

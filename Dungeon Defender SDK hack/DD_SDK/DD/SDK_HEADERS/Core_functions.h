@@ -1,3 +1,4 @@
+
 /*
 #############################################################################################
 # Dungeon Defender (8.7.1) SDK
@@ -31,8 +32,8 @@ char* UObject::GetName()
 { 
 	static char cOutBuffer[ 256 ]; 
 
-	sprintf_s ( cOutBuffer, "%s", this->Name.GetName() ); 
-
+	//sprintf_s ( cOutBuffer, "%s", this->Name.GetName() ); 
+	sprintf_s(cOutBuffer, "%s", this->Name.GetName());
 	return cOutBuffer; 
 } 
 
