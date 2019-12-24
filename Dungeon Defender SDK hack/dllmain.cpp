@@ -308,9 +308,9 @@ void PostRender(UCanvas* canvas)
 
 
 		
-		DrawMenu(canvas, MainMenu, fBlue, fWhite, false,110);
+		DrawMenu(canvas, MainMenu, fWhite, fBlue, false,110);
 		if (FilterMenu.bIsActive)
-		DrawMenu(canvas, FilterMenu, fBlue, fWhite, true, 160);
+		DrawMenu(canvas, FilterMenu, fWhite, fBlue, true, 160);
 
 		
 /*
@@ -600,7 +600,7 @@ void __fastcall HookedPE(UObject* pObject, void* edx, UFunction* pFunction, void
 
 							if (PutItemIn) {
 								heroManager->AddEquipmentObjectToItemBox(player->MyPlayerHero, tempweap, 1);
-								TotalItems.num++;
+								TotalItems.StatToDisplay++;
 							}
 
 
