@@ -14,14 +14,6 @@ void MenuChoice::Dec(float IncBy) {
 
 
 
-
-
-
-
-
-
-
-
 Menu::Menu(Pos pos) {
 	Position = pos;
 }

@@ -15,9 +15,10 @@ tProcessEvent ProcessEvent = (tProcessEvent)ProcessEventAddress;
 
 HMODULE threadmodule;
 
-//
-//FILE* fp = fopen("DDFunctionsF1.txt", "w+");
-//FILE* ffp = fopen("DDCheck.txt", "w+");
+bool bFilter = false;
+
+FILE* fp = fopen("DDFunctionsF1.txt", "w+");
+FILE* ffp = fopen("DDCheck.txt", "w+");
 
 
 //BGRA
@@ -118,8 +119,6 @@ void SetUpMenu(){
 
 }
 
-
-
 UObject* GetInstanceOf(UClass* Class)
 {
 	if (!UObject::GObjObjects())
@@ -143,7 +142,7 @@ UObject* GetInstanceOf(UClass* Class)
 FVector WorldToScreen(UCanvas* pCanvas, FVector Location)
 {
 
-	FVector Return;
+	FVector Return = { 0,0,0 };
 
 	FVector AxisX, AxisY, AxisZ, Delta, Transformed;
 
@@ -158,12 +157,13 @@ FVector WorldToScreen(UCanvas* pCanvas, FVector Location)
 	if (Transformed.Z < 1.00f)
 		Transformed.Z = 1.00f;
 
-	
-	float FOVAngle = controller->PlayerCamera->GetFOVAngle();
+	if (controller && controller->PlayerCamera) {
+		float FOVAngle = controller->PlayerCamera->GetFOVAngle();
 
-	Return.X = (pCanvas->ClipX / 2.0f) + Transformed.X * ((pCanvas->ClipX / 2.0f) / controller->Tan(FOVAngle * CONST_Pi / 360.0f)) / Transformed.Z;
-	Return.Y = (pCanvas->ClipY / 2.0f) + -Transformed.Y * ((pCanvas->ClipX / 2.0f) / controller->Tan(FOVAngle * CONST_Pi / 360.0f)) / Transformed.Z;
-	Return.Z = 0;
+		Return.X = (pCanvas->ClipX / 2.0f) + Transformed.X * ((pCanvas->ClipX / 2.0f) / controller->Tan(FOVAngle * CONST_Pi / 360.0f)) / Transformed.Z;
+		Return.Y = (pCanvas->ClipY / 2.0f) + -Transformed.Y * ((pCanvas->ClipX / 2.0f) / controller->Tan(FOVAngle * CONST_Pi / 360.0f)) / Transformed.Z;
+		Return.Z = 0;
+	}
 
 	return Return;
 
@@ -190,7 +190,6 @@ void DrawBox(UCanvas* pCanvas, float X, float Y, float Width, float Height, FCol
 
 
 }
-
 
 void DisplayChoice(UCanvas* canvas,MenuChoice choice,bool bDisplayStats) {
 
@@ -344,10 +343,10 @@ void PostRender(UCanvas* canvas)
 	if (level && (level->IsLobbyLevel || level->bNextLevelIsRestartLevel)) {
 		playerCam = nullptr;
 	}
-
-
-	if (level && controller) {
-		if (level->IsGameplayLevel && playerCam) {
+	//level && 
+	//level->IsGameplayLevel && 
+	if (controller) {
+		
 			if (gameEngine != nullptr && controller != nullptr)
 				if (controller->Pawn)
 					if (controller->Pawn->WorldInfo && controller->Pawn->WorldInfo->PawnList) {
@@ -413,7 +412,7 @@ void PostRender(UCanvas* canvas)
 			canvas->DrawText(test1, false, 1.0f, 1.0f, NULL, 100, 100, 100, 100, NULL, NULL);
 
 			canvas->DrawColor = tempc;
-		}
+		
 	}
 }
 
@@ -424,14 +423,14 @@ void __fastcall HookedPE(UObject* pObject, void* edx, UFunction* pFunction, void
 	char* szName = pFunction->GetFullName();
 	//LOGGING
 	//
-	//bool in = false;
-	//for (int i = 0; i < filterint; i++) {
-	//	if (strcmp(szName, filter[i]) == 0) {
-	//		if (bFilter)
-	//			in = true;
-	//	}
-	//}//0x%p, &pObject
-	//if (!in)fprintf(fp, "%s || %s  \n", pObject->Name.GetName(), szName);
+	bool in = false;
+	for (int i = 0; i < filterint; i++) {
+		if (strcmp(szName, filter[i]) == 0) {
+			if (bFilter)
+				in = true;
+		}
+	}//0x%p, &pObject
+	if (!in)fprintf(fp, "%s || %s  \n", pObject->Name.GetName(), szName);
 
 
 	//std::cout
