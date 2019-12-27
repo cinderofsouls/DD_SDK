@@ -15,71 +15,12 @@
 
 
 
-struct Pos {
-	float x = 0;
-	float y = 0;
-};
-class MenuChoice {
+
+class MenuChoice{
 public:
-	std::wstring Name;
+	MenuChoice(std::string name);
+	std::string Name;
 	bool bIsOn;
-	bool bIsSelected;
-	Pos Position;
-	
-	int num;
 	int StatToDisplay;
-	bool bDisplayANum;
-	bool bChangeDisplayNum = true;
-	MenuChoice(std::wstring name, bool isOn);
-
-	void Inc(float IncBy);
-	void Dec(float IncBy);
 };
-
-
-class Menu {
-public:
-	Menu(Pos pos);
-
-
-	int cSelected;
-
-	bool bIsActive;
-	bool bLockCurrentSelection;
-	int LastItemCount;
-	std::vector < MenuChoice* > Items;
-
-
-	Pos Position;
-	float TotalY;
-
-
-	void Toggle();
-
-	bool CalcBoxMaxY();
-
-	void SetPos(float x, float y);
-
-	void AddItem(MenuChoice* Item);
-	bool Up();
-	bool Down();
-	bool AllOff();
-	void IncMenuChoice(float IncBy);
-	void DecMenuChoice(float IncBy);
-
-};
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
