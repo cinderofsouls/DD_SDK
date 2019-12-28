@@ -51,7 +51,7 @@ tProcessEvent ProcessEvent = (tProcessEvent)ProcessEventAddress;
 
 
 HMODULE threadmodule;
-
+bool Logging = false;
 bool bFilter = false;
 
 FILE* fp = fopen("DDFunctionsF1.txt", "w+");
@@ -69,11 +69,11 @@ FColor fWhite = { 255, 255, 255, 255 };
 
 
 
-
+ADunDefPlayerAbility_GenericActorSpawner* spawner;
 
 UGameEngine* gameEngine;					  //EntityList
 APlayerController* controller;				  //player controller/hero
-ADunDefGameReplicationInfo* level;			  //level up
+ADunDefGameReplicationInfo* plevel;			  //level up
 UDunDef_SeqAct_SetWaveNumber* waveNum;		  //wavNum
 UDunDefHeroManager* heroManager;			  //Add items to box
 ADunDefPlayer* player;						  //might not be needed
@@ -101,9 +101,11 @@ bool LobbyMenu = false;
 
 bool BoxEsp = false;
 bool HealthEsp = false;
+bool TraceLine = false;
 
 bool EBoxEsp = false;
 bool EHealthEsp = false;
+bool ETraceLine = false;
 
 bool LineToTeleport = false;
 
@@ -122,23 +124,23 @@ MenuChoice lootshower(std::string("lootshower"));
 MenuChoice OnlyKill1(std::string("OnlyKill1"));
 
 
-int HHealth			= 0;
-int HSpeed			= 0;
-int HDamage			= 0;
-int HCast			= 0;
-int Ability1		= 0;
-int Ability2		= 0;
-int THealth			= 30;
-int TSpeed			= 0;
-int TDamage			= 0;
-int TRange			= 0;
+int HHealth = 0;
+int HSpeed = 0;
+int HDamage = 0;
+int HCast = 0;
+int Ability1 = 0;
+int Ability2 = 0;
+int THealth = 30;
+int TSpeed = 0;
+int TDamage = 0;
+int TRange = 0;
 
 int ItemsAdded = 0;
 int ItemsAddedTotal = 0;
 
 
 float gravity = .5;
-float jumpz = 13000;
+float jumpz = 1300;
 float Scale = 1;
 
 
@@ -167,7 +169,17 @@ UObject* GetInstanceOf(UClass* Class)
 	return ObjectInstance;
 };
 
+//fun funcs -----------------------------------------------------------
+void CastBird() {
 
+
+	if (spawner && spawner->ActorToSpawnUponCompletion && controller && controller->AcknowledgedPawn) {
+
+		FVector t = controller->AcknowledgedPawn->Location;
+		t.X += 50;
+		spawner->ServerActivateWithLocation(t);
+	}
+}
 
 
 //dx9 hook-------------------------------------------------------------
@@ -236,7 +248,7 @@ char* TrampHook(char* src, char* dst, unsigned int len)
 
 
 LRESULT __stdcall WndProc(const HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lparam) {
-	
+
 	if (showMenu)
 		ImGui_ImplWin32_WndProcHandler(hwnd, uMsg, wParam, lparam);
 
@@ -247,15 +259,7 @@ LRESULT __stdcall WndProc(const HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lpar
 
 
 
-//BOOL CALLBACK EnumWindowsProc(HWND hWnd, LPARAM lParam) {
-//	DWORD process;
-//	GetWindowThreadProcessId(hWnd, &process);
-//	if (GetCurrentProcessId() != process) {
-//		return TRUE;
-//	}
-//	Handle = hWnd;
-//	return FALSE;
-//}
+
 
 bool GetDevicePointer(void** pTable, size_t size) {
 
@@ -273,7 +277,7 @@ bool GetDevicePointer(void** pTable, size_t size) {
 	D3DPRESENT_PARAMETERS d3dpp = {};
 	d3dpp.Windowed = true;
 	d3dpp.SwapEffect = D3DSWAPEFFECT_DISCARD;
-	//EnumWindows(EnumWindowsProc, NULL);
+
 
 	d3dpp.hDeviceWindow = t;
 
@@ -317,7 +321,7 @@ HRESULT APIENTRY hkEndScene(LPDIRECT3DDEVICE9 pDevice) {
 		ImGui_ImplDX9_Init(pDevice);
 
 
-		
+
 
 	}
 
@@ -334,69 +338,93 @@ HRESULT APIENTRY hkEndScene(LPDIRECT3DDEVICE9 pDevice) {
 
 		}
 		else {
-			ImGui::AlignTextToFramePadding();
-			ImGui::Checkbox(ESP.Name.c_str(), &EspMenu); ImGui::SameLine();
-			ImGui::Checkbox(GodMode.Name.c_str(), &GodMode.bIsOn);
-			ImGui::Checkbox(Vaccume.Name.c_str(), &Vaccume.bIsOn); ImGui::SameLine();
-			ImGui::Checkbox(lastwave.Name.c_str(), &lastwave.bIsOn);
-			ImGui::Checkbox(autolevel.Name.c_str(), &autolevel.bIsOn); ImGui::SameLine();
-			ImGui::Checkbox(InstantKill.Name.c_str(), &InstantKill.bIsOn);
-			ImGui::Checkbox(lootshower.Name.c_str(), &lootshower.bIsOn); ImGui::SameLine();
-			ImGui::Checkbox(OnlyKill1.Name.c_str(), &OnlyKill1.bIsOn);
-			ImGui::Checkbox("LobbyMenu", &LobbyMenu);
 
-			
 
-			
+			ImGui::Checkbox("ESP MENU", &EspMenu);
+			ImGui::Checkbox("LOBBY MENU", &LobbyMenu);
+			ImGui::Checkbox("LOOTSHOWER MENU", &lootshowerMenu);
+			ImGui::SliderFloat("Damage", &plevel->NightmareModeHeroDamageMultiplier, 0, 9999);
 
+			if(ImGui::Button("Damage")) {
+				
+
+
+
+				
+
+				//if (plevel && spawner && player) {
+				//	
+				//	
+
+				//	//for (int i = 0; i < player->PlayerAbilities.Count; i++)
+				//	//{
+				//	//	player->PlayerAbilities.Data[i]->ActivationInterval = 0;
+				//	//	player->PlayerAbilities.Data[i]->MinimumReactivationInterval = 0;
+				//	//	player->PlayerAbilities.Data[i]->LobbyActivationInterval = 0;
+				//	//}
+
+
+				//	
+
+				//}
+			}
+			//ImGui::Checkbox("Logging", &Logging);
 
 
 
 
 			ImGui::End();
 		}
-		
 
-
-		
 
 		if (LobbyMenu) {
+			ImGui::Begin("LOBBY MENU");
 
-			if (ImGui::Begin("LOBBY MENU")) {
-				ImGui::SliderFloat("Gravity", &gravity, 0, 5);
-				ImGui::SliderFloat("Jump Height", &jumpz, 1200, 10000);
-				ImGui::SliderFloat("Scale", &Scale, -50, 50);
-					if (ImGui::Button(".5"))
-						Scale = .5;
-					ImGui::SameLine();
-					if (ImGui::Button("1"))
-						Scale = 1;
-				ImGui::End();
-			}
+
+			ImGui::SliderFloat("Gravity", &gravity, 0, 5);
+			ImGui::SliderFloat("Jump Height", &jumpz, 1200, 30000);
+			ImGui::SliderFloat("Scale", &Scale, -10, 10);
+
 
 			
+			ImGui::BeginChild("Child1", ImVec2(ImGui::GetWindowContentRegionWidth() * 0.5f, 260), false);
+			ImGui::Checkbox(GodMode.Name.c_str(), &GodMode.bIsOn);
+			ImGui::Checkbox(lastwave.Name.c_str(), &lastwave.bIsOn);
+			ImGui::Checkbox(InstantKill.Name.c_str(), &InstantKill.bIsOn);
+			ImGui::EndChild(); ImGui::SameLine();
+
+			ImGui::BeginChild("Child2", ImVec2(ImGui::GetWindowContentRegionWidth() * 0.5f, 260), false);
+
+			ImGui::Checkbox(OnlyKill1.Name.c_str(), &OnlyKill1.bIsOn);
+			ImGui::Checkbox(autolevel.Name.c_str(), &autolevel.bIsOn);
+			ImGui::Checkbox(Vaccume.Name.c_str(), &Vaccume.bIsOn);
+			ImGui::EndChild();
+
+			ImGui::End();
 		}
-
-
 		if (EspMenu) {
 			ImGui::Begin("ESP MENU");
 
+			ImGui::BeginChild("Child1", ImVec2(ImGui::GetWindowContentRegionWidth() * 0.5f, 80), false);
+			ImGui::Checkbox("Player ESP Box", &BoxEsp);
+			ImGui::Checkbox("Player ESP Health", &HealthEsp);
+			ImGui::Checkbox("Player TraceLine", &TraceLine);
+			ImGui::EndChild(); ImGui::SameLine();
 
-			ImGui::Checkbox("BOX ESP", &BoxEsp); ImGui::SameLine();
-			ImGui::Checkbox("HEALTH ESP", &HealthEsp);
-			ImGui::Checkbox("ENEMY BOX ESP", &ESP.bIsOn); ImGui::SameLine();
-			ImGui::Checkbox("ENEMY HEALTH ESP", &HealthEsp);
-			ImGui::Checkbox("SNAPE LINE TO TELEPORT LOCATION", &LineToTeleport);
+			ImGui::BeginChild("Child2", ImVec2(ImGui::GetWindowContentRegionWidth() * 0.5f, 80), false);
+			ImGui::Checkbox("Enemy ESP Box", &EBoxEsp);
+			ImGui::Checkbox("Enemy ESP Health", &EHealthEsp);
+			ImGui::Checkbox("Enemy TraceLine", &ETraceLine);
+			ImGui::EndChild();
 
-
-			ImGui::End();
+			ImGui::Checkbox("LineToTeleport", &LineToTeleport);
 			
 
+			ImGui::End();
 		}
 
-
-		if (lootshower.bIsOn) {
-			ImGui::Begin("Loot Filter Settings");
+		if (lootshowerMenu) {
+			ImGui::Begin("LOOTSHOWER MENU");
 
 			ImGui::SliderInt("Hero Health", &HHealth, 0, 500);
 			ImGui::SliderInt("Hero Speed", &HSpeed, 0, 500);
@@ -408,18 +436,16 @@ HRESULT APIENTRY hkEndScene(LPDIRECT3DDEVICE9 pDevice) {
 			ImGui::SliderInt("Tower Speed", &TSpeed, 0, 500);
 			ImGui::SliderInt("Tower Damage", &TDamage, 0, 500);
 			ImGui::SliderInt("Tower Range", &TRange, 0, 500);
-
-			ImGui::Text("ItemsAdded : %d   |  Items Filtered : %d", ItemsAdded, ItemsAddedTotal);
+			ImGui::Text("ItemsAdded : %d   |  Items Filtered : %d", ItemsAdded, ItemsAddedTotal); ImGui::SameLine();
 			if (ImGui::Button("Reset")) {
 				ItemsAdded = 0;
 				ItemsAddedTotal = 0;
 			}
 
-			
-
-
+			ImGui::Checkbox("Enable/Disable", &lootshower.bIsOn);
 			ImGui::End();
 		}
+
 
 
 		ImGui::EndFrame();
@@ -464,7 +490,7 @@ FVector WorldToScreen(UCanvas* pCanvas, FVector Location)
 	return Return;
 
 }
-void DrawEspBox(ADunDefPawn* Target, UCanvas* canvas) {
+void GetPoints(ADunDefPawn* Target, UCanvas* canvas, FVector* arrayin) {
 
 
 	FBoxSphereBounds PlayerBounds = Target->Mesh->Bounds;
@@ -532,96 +558,106 @@ void DrawEspBox(ADunDefPawn* Target, UCanvas* canvas) {
 	BottomRight.X -= TopLeft.X;
 	BottomRight.Y -= TopLeft.Y;
 
-	canvas->SetPos(TopLeft.X, TopLeft.Y);
-	canvas->DrawBox(BottomRight.X, BottomRight.Y);
+	//canvas->SetPos(TopLeft.X, TopLeft.Y);
+	//canvas->DrawBox(BottomRight.X, BottomRight.Y);
+
+
+	FVector ret[] = { TopLeft,BottomRight };
+	//arrayin
+	arrayin[0] = ret[0];
+	arrayin[1] = ret[1];
+
+}
+void DrawEspBox(ADunDefPawn* Target, UCanvas* canvas, FVector arrayin[]) {
+
+	canvas->SetPos(arrayin[0].X, arrayin[0].Y);
+	canvas->DrawBox(arrayin[1].X, arrayin[1].Y);
+
 
 }
 void PostRender(UCanvas* canvas)
 {
 	if (!canvas) return;
 	FColor tempc = canvas->DrawColor;
-
-	if (level && (level->IsLobbyLevel || level->bNextLevelIsRestartLevel)) {
+	plevel = ((ADunDefBasePlayerController*)(controller))->GetGRI();
+	if (plevel && (plevel->IsLobbyLevel || plevel->bNextLevelIsRestartLevel)) {
 		playerCam = nullptr;
 	}
 	//level && 
 	//level->IsGameplayLevel && 
 	if (controller) {
 		if (gameEngine != nullptr && controller != nullptr)
-			if (controller->Pawn)
+			if (controller->Pawn) {
 				if (controller->Pawn->WorldInfo && controller->Pawn->WorldInfo->PawnList) {
-
+					FVector PlayerCord = WorldToScreen(canvas, controller->Pawn->Location);
 					ADunDefPawn* Target = (ADunDefPawn*)controller->Pawn->WorldInfo->PawnList;
+
+					
+					
 					while (Target != NULL)
 					{
 						if (Target != NULL && !Target->bDeleteMe && Target != controller->Pawn && Target->IsAliveAndWell())
 						{
-							
+							FVector TargetPoints[2];
+							GetPoints(Target, canvas, TargetPoints);
+							//CastBird();
 							if (Target && Target->Controller && Target->Controller->bIsPlayer)
 							{
-								ADunDefPlayer* playertemp = (ADunDefPlayer*)Target;
-								playertemp->GravityZMultiplier = gravity;
-								playertemp->JumpZ = jumpz;
-								playertemp->DrawScale = Scale;
-								
-								if (ESP.bIsOn) {
+								canvas->DrawColor = fGreen;
+								if (TargetPoints[0].X <= canvas->ClipX || TargetPoints[0].Y <= canvas->ClipY) {
+									//PLAYER HOOKING AND CHANGING
+									ADunDefPlayer* playertemp = (ADunDefPlayer*)Target;
+									playertemp->GravityZMultiplier = gravity;
+									playertemp->JumpZ = jumpz;
+									playertemp->DrawScale = Scale;
 
-									canvas->DrawColor = fGreen;
+
+
+									canvas->DrawColor = fBlue;
 									if (BoxEsp)
-										DrawEspBox(Target, canvas);
-
-
-									
-									
-
-
-									
-									canvas->DrawColor = fGreen;
-									FVector screencord = WorldToScreen(canvas, playertemp->Location);
-									if (screencord.X <= canvas->ClipX || screencord.Y <= canvas->ClipY) {
-										canvas->SetPos(screencord.X, screencord.Y);
-
+										DrawEspBox(Target, canvas, TargetPoints);
+									if (HealthEsp) {
+										canvas->SetPos(TargetPoints[0].X, TargetPoints[0].Y);
 										swprintf_s(buffer, L"%d", playertemp->Health);
 										canvas->DrawText(buffer, false, 1.0f, 1.0f, NULL, 100, 100, 100, 100, NULL, NULL);
 									}
-								}
-								if (GodMode.bIsOn) {
-									playertemp->Controller->bGodMode = 1;
-								}
-								else {
-									playertemp->Controller->bGodMode = 0;
-								}
 
+									if (TraceLine) {
+										canvas->Draw2DLine(TargetPoints[0].X, TargetPoints[0].Y, PlayerCord.X, PlayerCord.Y, fGreen);
+									}
+
+
+									if (GodMode.bIsOn) {
+										playertemp->Controller->bGodMode = 1;
+									}
+									else {
+										playertemp->Controller->bGodMode = 0;
+									}
+
+
+								}
 
 
 							}
 							else
 							{
+								//ENEMY HOOKIN AND CHANGING
 								ADunDefEnemy* enemy = ((ADunDefEnemy*)(Target));
+								canvas->DrawColor = fRed;
+								if (EBoxEsp)
+									DrawEspBox(Target, canvas, TargetPoints);
+								if (EHealthEsp) {
+									canvas->SetPos(TargetPoints[0].X, TargetPoints[0].Y);
+									swprintf_s(buffer, L"%d", enemy->Health);
+									canvas->DrawText(buffer, false, 1.0f, 1.0f, NULL, 100, 100, 100, 100, NULL, NULL);
+								}
 
-								if (ESP.bIsOn) {
-
-									
-									canvas->DrawColor = fRed;
-
-
-									DrawEspBox(enemy, canvas);
-
-
-
-									FVector screencord = WorldToScreen(canvas, enemy->Location);
-									if (screencord.X <= canvas->ClipX || screencord.Y <= canvas->ClipY) {
-										canvas->SetPos(screencord.X, screencord.Y);
-
-										swprintf_s(buffer, L"%d", enemy->Health);
-										canvas->DrawText(buffer, false, 1.0f, 1.0f, NULL, 100, 100, 100, 100, NULL, NULL);
-									}
-
-									
+								if (ETraceLine) {
+									canvas->Draw2DLine(TargetPoints[0].X, TargetPoints[0].Y, PlayerCord.X, PlayerCord.Y, fRed);
 								}
 
 
-								
+
 								if (Vaccume.bIsOn)
 									enemy->Location = TeleportLocation;
 
@@ -633,30 +669,29 @@ void PostRender(UCanvas* canvas)
 								if (lootshower.bIsOn) {
 									enemy->SpawnDroppedEquipment();
 								}
-								
-							}
 
 						}
-						Target = (ADunDefPawn*)Target->NextPawn;
+
 					}
+					Target = (ADunDefPawn*)Target->NextPawn;
 				}
 
+				//DRAW TELEPORT LOCATION ENEMY
+				if (controller && controller->Pawn) {
+					canvas->DrawColor = fCyan;
+					FVector TeleCord = WorldToScreen(canvas, TeleportLocation);
+					
+					canvas->SetPos(TeleCord.X, TeleCord.Y);
+					wchar_t test1[] = L"T";
+					canvas->DrawText(test1, false, 1.0f, 1.0f, NULL, 100, 100, 100, 100, NULL, NULL);
+					if (LineToTeleport)
+						canvas->Draw2DLine(TeleCord.X, TeleCord.Y, PlayerCord.X, PlayerCord.Y, fGreen);
 
-		if (controller && controller->Pawn) {
-			canvas->DrawColor = fCyan;
-			FVector TeleCord = WorldToScreen(canvas, TeleportLocation);
-			FVector PlayerCord = WorldToScreen(canvas, controller->Pawn->Location);
-			canvas->SetPos(TeleCord.X, TeleCord.Y);
-			wchar_t test1[] = L"T";
-			canvas->DrawText(test1, false, 1.0f, 1.0f, NULL, 100, 100, 100, 100, NULL, NULL);
-			if(LineToTeleport)
-			canvas->Draw2DLine(TeleCord.X, TeleCord.Y, PlayerCord.X, PlayerCord.Y, fGreen);
-
-		}
-
-		canvas->DrawColor = tempc;
-
+				}
+			}
 	}
+}
+canvas->DrawColor = tempc;
 }
 
 
@@ -672,15 +707,16 @@ void __fastcall HookedPE(UObject* pObject, void* edx, UFunction* pFunction, void
 	char* szName = pFunction->GetFullName();
 	//LOGGING
 	//
-	//bool in = false;
-	//for (int i = 0; i < filterint; i++) {
-	//	if (strcmp(szName, filter[i]) == 0) {
-	//		if (bFilter)
-	//			in = true;
-	//	}
-	//}//0x%p, &pObject
-	//if (!in)fprintf(fp, "%s || %s  \n", pObject->Name.GetName(), szName);
-
+	if (Logging) {
+		bool in = false;
+		for (int i = 0; i < filterint; i++) {
+			if (strcmp(szName, filter[i]) == 0) {
+				if (bFilter)
+					in = true;
+			}
+		}//0x%p, &pObject
+		if (!in)fprintf(fp, "%s || %s  \n", pObject->Name.GetName(), szName);
+	}
 
 	//std::cout
 	//	<< std::hex << szName << " "
@@ -692,25 +728,79 @@ void __fastcall HookedPE(UObject* pObject, void* edx, UFunction* pFunction, void
 
 
 	if (szName) {
-		if (gameEngine)
+		if (gameEngine) {
 			if (gameEngine->GamePlayers.Count != 0) {
 				if (gameEngine->GamePlayers.Data[0] != NULL)
 					controller = gameEngine->GamePlayers.Data[0]->Actor;
 
 
-				
-					if (strcmp(szName, "Function UDKGame.Main.Tick") == 0) {
-						main = ((AMain*)(pObject));
-						if (OnlyKill1.bIsOn && main && main->CurrentKillCountUI) {
-							if(main->CurrentKillCountUI->KillCountRemaining > 1)
-								main->CurrentKillCountUI->KillCountRemaining = 1;
-							
-						}
+
+				if (controller && controller->Pawn) {
+					controller->Pawn->GravityZMultiplier = gravity;
+					controller->Pawn->JumpZ = jumpz;
+
+					controller->Pawn->DrawScale = Scale;
+
+					if (GodMode.bIsOn) {
+						controller->bGodMode = 1;
 					}
+					else
+					{
+						controller->bGodMode = 0;
+					}
+				}
 
 
 
-					//Wave number
+				//kill 1 to advance wave
+				if (strcmp(szName, "Function UDKGame.Main.Tick") == 0) {
+					main = ((AMain*)(pObject));
+					if (OnlyKill1.bIsOn && main && main->CurrentKillCountUI) {
+						if (main->CurrentKillCountUI->KillCountRemaining > 1)
+							main->CurrentKillCountUI->KillCountRemaining = 1;
+
+					}
+					if (main && GodMode.bIsOn) {
+						main->bCrystalCoreInvincible = 1;
+					}
+				}
+
+
+
+
+
+				/*		if (strcmp(szName, "Function DunDefPlayerAbility_GenericActorSpawner.CastingAbility.BeginState") == 0) {
+							ADunDefPlayerAbility_GenericActorSpawner* temp = ((ADunDefPlayerAbility_GenericActorSpawner*)(pObject));
+							spawner = temp;
+
+						}*/
+
+
+						//if (strcmp(szName, "Function UDKGame.DunDef_SeqAct_LockContent.Activated") == 0) {
+						//	UDunDef_SeqAct_LockContent* temp = ((UDunDef_SeqAct_LockContent*)(pObject));
+						//	temp->bLockLevel = 0;
+						//}
+
+
+
+						//if (strcmp(szName, "Function UDKGame.DunDef_SeqCond_IsAchievementUnlocked.Activated") == 0) {
+						//	UDunDef_SeqCond_IsAchievementUnlocked* temp = ((UDunDef_SeqCond_IsAchievementUnlocked*)(pObject));
+						//	temp->IsUnlockedByAnyLocalPlayer = 1;
+						//}
+
+
+
+					//nightmare unlock
+				if (strcmp(szName, "Function UDKGame.DunDef_SeqAct_SetNightmareUnlocked.Activated") == 0) {
+					UDunDef_SeqAct_SetNightmareUnlocked* temp = ((UDunDef_SeqAct_SetNightmareUnlocked*)(pObject));
+					if (temp) {
+						temp->bSetUnlocked = 1;
+						temp->bActuallyDoSet = 1;
+					}
+				}
+
+
+				//Wave number
 				if (strcmp(szName, "Function UDKGame.DunDef_SeqAct_SetWaveNumber.Activated") == 0) {
 					waveNum = ((UDunDef_SeqAct_SetWaveNumber*)(pObject));
 					if (lastwave.bIsOn) {
@@ -719,42 +809,42 @@ void __fastcall HookedPE(UObject* pObject, void* edx, UFunction* pFunction, void
 					}
 				}
 
-				//god mode
-				if (strcmp(szName, "Function UDKGame.DunDefPlayer.Tick") == 0)
-				{
-					if (pObject && ((ADunDefPlayer*)(pObject))->bIsHostPlayer) {
-						player = (ADunDefPlayer*)pObject;
+				////god mode
+				//if (strcmp(szName, "Function UDKGame.DunDefPlayer.Tick") == 0)
+				//{
+				//	if (pObject && ((ADunDefPlayer*)(pObject))->bIsHostPlayer) {
+				//		player = (ADunDefPlayer*)pObject;
 
-					}
-					if (GodMode.bIsOn && ((ADunDefPlayer*)(pObject)) && ((ADunDefPlayer*)(pObject))->Controller) {
-						((ADunDefPlayer*)(pObject))->Controller->bGodMode = 1;
-					}
+				//	}
+				//	if (GodMode.bIsOn && ((ADunDefPlayer*)(pObject)) && ((ADunDefPlayer*)(pObject))->Controller) {
+				//		((ADunDefPlayer*)(pObject))->Controller->bGodMode = 1;
+				//	}
 
-				}
+				//}
 
-				//god mode backup
-				if (strcmp(szName, "Function UDKGame.DunDefPlayerController.GetPlayerViewPoint ") == 0)
-				{
+				////god mode backup
+				//if (strcmp(szName, "Function UDKGame.DunDefPlayerController.GetPlayerViewPoint ") == 0)
+				//{
 
-					if (pObject && ((ADunDefPlayer*)(pObject))->bIsHostPlayer) {
-						player = (ADunDefPlayer*)pObject;
+				//	if (pObject && ((ADunDefPlayer*)(pObject))->bIsHostPlayer) {
+				//		player = (ADunDefPlayer*)pObject;
 
-					}
-					if (GodMode.bIsOn && ((ADunDefPlayer*)(pObject)) && ((ADunDefPlayer*)(pObject))->Controller)
-						((ADunDefPlayer*)(pObject))->Controller->bGodMode = 1;
-				}
+				//	}
+				//	if (GodMode.bIsOn && ((ADunDefPlayer*)(pObject)) && ((ADunDefPlayer*)(pObject))->Controller)
+				//		((ADunDefPlayer*)(pObject))->Controller->bGodMode = 1;
+				//}
 
-				//god mode crystal core
-				if (strcmp(szName, "Function UDKGame.DunDefCrystalCore.Tick") == 0) {
-					if (GodMode.bIsOn)
-						((ADunDefCrystalCore*)(pObject))->Health = 999999999;
-				}
+				////god mode crystal core
+				//if (strcmp(szName, "Function UDKGame.DunDefCrystalCore.Tick") == 0) {
+				//	if (GodMode.bIsOn)
+				//		((ADunDefCrystalCore*)(pObject))->Health = 999999999;
+				//}
 
 				//wave skip
 				if (strcmp(szName, "Function UDKGame.DunDefGameReplicationInfo.Tick") == 0) {
-					level = ((ADunDefGameReplicationInfo*)(pObject));
-					if (autolevel.bIsOn && level)
-						level->AwardWaveCompletion(145);
+					plevel = ((ADunDefGameReplicationInfo*)(pObject));
+					if (autolevel.bIsOn && plevel)
+						plevel->AwardWaveCompletion(145);
 
 					//local text only
 					//if (level) {
@@ -787,12 +877,54 @@ void __fastcall HookedPE(UObject* pObject, void* edx, UFunction* pFunction, void
 				if (strcmp(szName, "Function UDKGame.DunDefDroppedEquipment.ReportEquipmentToStats") == 0) {
 					if (heroManager) {
 						UHeroEquipment* tempweap = ((ADunDefDroppedEquipment*)(pObject))->MyEquipmentObject;
+						//-- HACKED LOBBY MENU WORK IN PROGRESS --//
+						FLinearColor r = { 0,0,10000,10000 };
+						FLinearColor r1 = { 0,10000,0,10000 };
+						FLinearColor r2 = { 10000,0,0,10000 };
+						FLinearColor r3 = { 0,10000,10000,10000 };
+						FLinearColor r4 = { 10000,0,10000,10000 };
+						FLinearColor r5 = { 10000,10000,0,10000 };
+						FLinearColor r6 = { 0,0,0,10000 };
+						FLinearColor r7 = { 10000,10000,10000,10000 };
+						FLinearColor r8 = { 10000,.5,.5,10000 };
+						FLinearColor r9 = { .5,10000,.5,10000 };
+						FLinearColor r10 = { .5,.5,10000,10000 };
+
+						FLinearColor ra[] = {
+							r,r1,r2,r3,r4,r5,r6,r7,r8,r9,r10
+						};
 
 
-						if (tempweap && player && lootshower.bIsOn) {
-							bool PutItemIn = true;
+						static int ColorMod = 0;
+						static int ColorMod2 = 5;
+						if (ColorMod == 10)
+							ColorMod = 0;
+						if (ColorMod2 == 10)
+							ColorMod2 = 0;
+						
+						//tempweap->StatModifiers[statHHealth] = 90000;
+						//tempweap->StatModifiers[statHSpeed] = 90000;
+						//tempweap->StatModifiers[statHDamage] = 90000;
+						//tempweap->StatModifiers[statHCast ]= 90000;
+						//tempweap->StatModifiers[statAbility1 ]= 90000;
+						//tempweap->StatModifiers[statAbility2 ]= 90000;
+						//tempweap->StatModifiers[statTHealth ]= 90000;
+						//tempweap->StatModifiers[statTSpeed] = 90000;
+						//tempweap->StatModifiers[statTDamage] = 90000;
+						//tempweap->StatModifiers[statTRange] = 90000;
 
-							
+						tempweap->PrimaryColorOverride = ra[ColorMod];
+						tempweap->SecondaryColorOverride = ra[ColorMod];
+
+
+						ColorMod++;
+						ColorMod2++;
+
+
+						if (tempweap && lootshower.bIsOn) {
+							bool PutItemIn = false;
+
+
 							if (HHealth > 1)
 								if (tempweap->StatModifiers[statHHealth] <= HHealth)
 									PutItemIn = false;
@@ -827,19 +959,26 @@ void __fastcall HookedPE(UObject* pObject, void* edx, UFunction* pFunction, void
 
 
 
-
+							//player->MyPlayerHero;
 
 							if (PutItemIn) {
-								heroManager->AddEquipmentObjectToItemBox(player->MyPlayerHero, tempweap, 1);
+								heroManager->AddEquipmentObjectToItemBox(((ADunDefPlayer*)(controller->Pawn))->MyPlayerHero, tempweap, 1);
 								ItemsAdded++;
 							}
 							ItemsAddedTotal++;
 
 						}
+
+
+
 					}
 				}
+
+
+				
 			}
 
+		}
 
 		if (strcmp(szName, "Function Engine.Interaction.PostRender") == 0)
 		{
@@ -893,8 +1032,8 @@ void OnAttach()
 	}
 
 
-	
-	
+
+
 	DetourTransactionBegin();
 	DetourUpdateThread(GetCurrentThread());
 	DetourAttach(&(PVOID&)oScene, hkEndScene);
@@ -924,26 +1063,13 @@ void OnAttach()
 
 
 	bool end = true;
-	
+
 	while (end) {
 
 
-		if (controller && controller->Pawn) {
-			controller->Pawn->GravityZMultiplier = gravity;
-			controller->Pawn->JumpZ = jumpz;
 
-			controller->Pawn->DrawScale = Scale;
-
-			if (GodMode.bIsOn) {
-				controller->bGodMode = 1;
-			}
-			else
-			{
-				controller->bGodMode = 0;
-			}
-		}
-
-
+		
+		
 
 
 
@@ -972,7 +1098,7 @@ void OnAttach()
 
 
 
-	 (WNDPROC)SetWindowLongPtr(t, GWL_WNDPROC, (LONG_PTR)oWndProc);
+	(WNDPROC)SetWindowLongPtr(t, GWL_WNDPROC, (LONG_PTR)oWndProc);
 
 
 
